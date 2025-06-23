@@ -2,8 +2,22 @@
 
 import Header from "@/components/Header";
 import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function DetailPage() {
+export default function GeneratePage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    // 실제로는 여기서 API 호출을 하겠지만, 지금은 setTimeout으로 대체
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push('/result');
+    }, 3000); // 3초 후 결과 페이지로 이동
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -103,9 +117,41 @@ export default function DetailPage() {
           {/* 문제 생성하기 버튼 */}
           <button
             type="button"
-            className="w-full bg-black text-white py-4 text-lg font-medium hover:bg-gray-900 transition"
+            className={`w-full py-4 text-lg font-medium transition relative ${
+              isLoading 
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-black hover:bg-gray-900'
+            } text-white`}
+            onClick={handleGenerate}
+            disabled={isLoading}
           >
-            문제 생성하기
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                문제 생성 중...
+              </div>
+            ) : (
+              '문제 생성하기'
+            )}
           </button>
         </div>
       </main>
