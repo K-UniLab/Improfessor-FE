@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // 초기 다크모드 상태 설정
@@ -153,6 +155,7 @@ export default function Header() {
                       // TODO: 로그아웃 로직
                       console.log('로그아웃');
                       setIsProfileOpen(false);
+                      router.push('/login');
                     }}
                   >
                     로그아웃

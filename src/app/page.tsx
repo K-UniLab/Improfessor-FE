@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 min-h-screen flex flex-col justify-start pt-[25vh]">
         <main className="flex flex-col items-center text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-blue-900 dark:text-white mb-6">
             나는 교수다
