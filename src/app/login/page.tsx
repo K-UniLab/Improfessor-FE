@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-[#D9EAFD] to-[#F8FAFC]">
       <Link 
         href="/"
-        className="absolute top-6 left-6 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+        className="absolute top-6 left-6 text-black hover:text-[#BCCCDC] transition-colors"
       >
         <svg 
           className="w-6 h-6" 
@@ -23,31 +23,31 @@ export default function LoginPage() {
       </Link>
       
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white dark:bg-gray-800 p-8 shadow-lg w-full max-w-md">
-          <h1 className="text-3xl font-bold text-center text-blue-900 dark:text-white mb-8">로그인</h1>
+        <div className="bg-white p-8 shadow-lg w-full max-w-md">
+          <h1 className="text-3xl font-bold text-center text-black mb-8">로그인</h1>
           
           <form className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
                 이메일
               </label>
               <input
                 type="email"
                 id="email"
-                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-[#BCCCDC]"
                 placeholder="your@email.com"
                 required
               />
             </div>
             
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-black mb-2">
                 비밀번호
               </label>
               <input
                 type="password"
                 id="password"
-                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-[#BCCCDC]"
                 placeholder="••••••••"
                 required
               />
@@ -55,16 +55,16 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+              className="w-full bg-[#D9EAFD] text-black py-3 rounded-lg hover:bg-[#BCCCDC] transition"
             >
               로그인
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-black">
               계정이 없으신가요?{" "}
-              <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+              <Link href="/signup" className="text-[#BCCCDC] hover:text-black">
                 회원가입
               </Link>
             </p>

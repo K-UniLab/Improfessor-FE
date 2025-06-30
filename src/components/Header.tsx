@@ -3,19 +3,17 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from '@/context/ThemeContext';
 
 export default function Header() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const router = useRouter();
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow relative">
+    <header className="bg-white shadow relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/generate" className="text-2xl font-bold text-blue-900 dark:text-white">
+            <Link href="/generate" className="text-2xl font-bold text-black">
               내가교수다
             </Link>
           </div>
@@ -24,7 +22,7 @@ export default function Header() {
             {/* 공지사항 버튼 */}
             <Link
               href="/notice"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-black hover:text-[#BCCCDC] transition-colors"
             >
               <svg
                 className="w-6 h-6"
@@ -41,46 +39,10 @@ export default function Header() {
               </svg>
             </Link>
 
-            {/* 다크모드 토글 버튼 */}
-            <button
-              onClick={toggleDarkMode}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              {isDarkMode ? (
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              )}
-            </button>
-
             {/* 프로필 드롭다운 */}
             <div className="relative">
               <button
-                className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="flex items-center text-black hover:text-[#BCCCDC] transition-colors"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
                 <svg
@@ -100,16 +62,16 @@ export default function Header() {
 
               {/* 드롭다운 메뉴 */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 border border-gray-200 dark:border-gray-700">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-[#BCCCDC]">
                   <Link
                     href="/mypage"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="block px-4 py-2 text-sm text-black hover:bg-[#D9EAFD]"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     마이페이지
                   </Link>
                   <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-[#D9EAFD]"
                     onClick={() => {
                       // TODO: 로그아웃 로직
                       console.log('로그아웃');
