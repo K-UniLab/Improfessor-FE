@@ -36,32 +36,12 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-blue-900 dark:text-white">
+            <Link href="/generate" className="text-2xl font-bold text-blue-900 dark:text-white">
               내가교수다
             </Link>
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* 문제 생성 버튼 */}
-            <Link
-              href="/generate"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </Link>
-
             {/* 공지사항 버튼 */}
             <Link
               href="/notice"

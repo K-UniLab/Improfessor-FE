@@ -1,3 +1,5 @@
+'use client';
+
 import axios from 'axios';
 
 export const axiosInstance = axios.create({
@@ -11,7 +13,7 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     // 토큰이 필요한 경우 여기서 처리
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,7 +31,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     // 에러 처리 로직
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       // 인증 에러 처리
       localStorage.removeItem('token');
     }
