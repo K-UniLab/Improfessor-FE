@@ -1,8 +1,129 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
+import { useAlert } from "@/context/AlertContext";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const { useSendVerificationEmail, useVerifyEmail, useRegister } = useAuth();
+  const sendVerification = useSendVerificationEmail();
+  const verifyEmail = useVerifyEmail();
+  const register = useRegister();
+  const { showAlert } = useAlert();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    verificationCode: "",
+    nickname: "",
+    password: "",
+    confirmPassword: "",
+    university: "",
+    major: "",
+  });
+
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [timer, setTimer] = useState<number | null>(null);
+  const [canResend, setCanResend] = useState(true);
+
+  useEffect(() => {
+    if (timer === null) return;
+    
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === null || prev <= 0) {
+          setCanResend(true);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSendVerification = async () => {
+    if (!formData.email) {
+      showAlert("이메일을 입력해주세요.");
+      return;
+    }
+
+    if (!canResend) {
+      showAlert(`${Math.ceil(timer! / 60)}분 ${timer! % 60}초 후에 다시 시도해주세요.`);
+      return;
+    }
+
+    try {
+      await sendVerification.mutateAsync({ email: formData.email });
+      setTimer(180);
+      setCanResend(false);
+      showAlert("인증 코드가 전송되었습니다. 이메일을 확인해주세요.");
+    } catch (error: unknown) {
+      console.error('인증 코드 전송 실패:', error);
+      showAlert("인증 코드 전송에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!formData.verificationCode) {
+      showAlert("인증 코드를 입력해주세요.");
+      return;
+    }
+
+    try {
+      await verifyEmail.mutateAsync({
+        email: formData.email,
+        code: formData.verificationCode
+      });
+      setIsEmailVerified(true);
+      showAlert("이메일이 인증되었습니다.");
+    } catch (error: unknown) {
+      console.error('이메일 인증 실패:', error);
+      showAlert("이메일 인증에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isEmailVerified) {
+      showAlert("이메일 인증을 완료해주세요.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      showAlert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      await register.mutateAsync({
+        email: formData.email,
+        nickname: formData.nickname,
+        password: formData.password,
+        university: formData.university,
+        major: formData.major,
+        freeCount: 0,
+        recommendCount: 0
+      });
+      showAlert("회원가입이 완료되었습니다.");
+      router.push("/login");
+    } catch (error: unknown) {
+      console.error('회원가입 실패:', error);
+      showAlert("회원가입에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#D9EAFD] to-[#F8FAFC] relative">
       <div 
@@ -38,7 +159,7 @@ export default function SignupPage() {
         <div className="bg-white p-8 shadow-lg w-full max-w-md rounded-lg">
           <h1 className="text-4xl font-bold text-center text-black mb-8">회원가입</h1>
           
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
                 이메일 <span className="text-black/50">*</span>
@@ -47,15 +168,20 @@ export default function SignupPage() {
                 <input
                   type="email"
                   id="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                   placeholder="your@email.com"
                   required
+                  disabled={isEmailVerified}
                 />
                 <button
                   type="button"
-                  className="px-4 py-2 bg-[#D9EAFD] text-black rounded-lg hover:bg-[#BCCCDC] transition whitespace-nowrap"
+                  onClick={handleSendVerification}
+                  disabled={isEmailVerified || sendVerification.isPending}
+                  className="px-4 py-2 bg-[#D9EAFD] text-black rounded-lg hover:bg-[#BCCCDC] transition whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  인증번호 전송
+                  {sendVerification.isPending ? "전송 중..." : "인증번호 전송"}
                 </button>
               </div>
             </div>
@@ -68,15 +194,21 @@ export default function SignupPage() {
                 <input
                   type="text"
                   id="verificationCode"
+                  value={formData.verificationCode}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
-                  placeholder="인증번호 6자리"
+                  placeholder="인증번호"
                   required
+                  disabled={isEmailVerified}
+                  maxLength={36}
                 />
                 <button
                   type="button"
-                  className="px-4 py-2 bg-[#D9EAFD] text-black rounded-lg hover:bg-[#BCCCDC] transition whitespace-nowrap"
+                  onClick={handleVerifyEmail}
+                  disabled={isEmailVerified || verifyEmail.isPending}
+                  className="px-4 py-2 bg-[#D9EAFD] text-black rounded-lg hover:bg-[#BCCCDC] transition whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  확인
+                  {verifyEmail.isPending ? "확인 중..." : "확인"}
                 </button>
               </div>
             </div>
@@ -88,6 +220,8 @@ export default function SignupPage() {
               <input
                 type="text"
                 id="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                 placeholder="닉네임을 입력해주세요"
                 required
@@ -101,6 +235,8 @@ export default function SignupPage() {
               <input
                 type="password"
                 id="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                 placeholder="비밀번호를 입력해주세요"
                 required
@@ -114,6 +250,8 @@ export default function SignupPage() {
               <input
                 type="password"
                 id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                 placeholder="비밀번호를 다시 입력해주세요"
                 required
@@ -127,40 +265,33 @@ export default function SignupPage() {
               <input
                 type="text"
                 id="university"
+                value={formData.university}
+                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                 placeholder="대학교를 입력해주세요"
               />
             </div>
 
             <div>
-              <label htmlFor="department" className="block text-sm font-medium text-black mb-2">
+              <label htmlFor="major" className="block text-sm font-medium text-black mb-2">
                 학과 <span className="text-black/50">(선택)</span>
               </label>
               <input
                 type="text"
-                id="department"
+                id="major"
+                value={formData.major}
+                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
                 placeholder="학과를 입력해주세요"
               />
             </div>
 
-            <div>
-              <label htmlFor="referralCode" className="block text-sm font-medium text-black mb-2">
-                추천인 코드 <span className="text-black/50">(선택)</span>
-              </label>
-              <input
-                type="text"
-                id="referralCode"
-                className="w-full px-4 py-2 bg-white border border-[#BCCCDC] rounded-lg focus:ring-2 focus:ring-[#D9EAFD] focus:border-transparent text-black placeholder-black/50"
-                placeholder="추천인 코드를 입력해주세요"
-              />
-            </div>
-
             <button
               type="submit"
-              className="w-full bg-[#D9EAFD] text-black py-3 rounded-lg hover:bg-[#BCCCDC] transition mt-8"
+              disabled={!isEmailVerified || register.isPending}
+              className="w-full bg-[#D9EAFD] text-black py-3 rounded-lg hover:bg-[#BCCCDC] transition mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              회원가입
+              {register.isPending ? "처리 중..." : "회원가입"}
             </button>
           </form>
 
