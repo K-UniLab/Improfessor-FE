@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { useAlert } from "@/context/AlertContext";
+import { AxiosError } from "axios";
+import { ApiResponse } from "@/types/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -68,9 +70,14 @@ export default function SignupPage() {
       setTimer(180);
       setCanResend(false);
       showAlert("인증 코드가 전송되었습니다. 이메일을 확인해주세요.");
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('인증 코드 전송 실패:', error);
-      showAlert("인증 코드 전송에 실패했습니다. 다시 시도해주세요.");
+      if (error instanceof AxiosError && error.response?.data) {
+        const errorResponse = error.response.data as ApiResponse<null>;
+        showAlert(errorResponse.message);
+      } else {
+        showAlert("인증 코드 전송에 실패했습니다. 다시 시도해주세요.");
+      }
     }
   };
 
@@ -87,9 +94,14 @@ export default function SignupPage() {
       });
       setIsEmailVerified(true);
       showAlert("이메일이 인증되었습니다.");
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('이메일 인증 실패:', error);
-      showAlert("이메일 인증에 실패했습니다. 다시 시도해주세요.");
+      if (error instanceof AxiosError && error.response?.data) {
+        const errorResponse = error.response.data as ApiResponse<null>;
+        showAlert(errorResponse.message);
+      } else {
+        showAlert("이메일 인증에 실패했습니다. 다시 시도해주세요.");
+      }
     }
   };
 
@@ -118,9 +130,14 @@ export default function SignupPage() {
       });
       showAlert("회원가입이 완료되었습니다.");
       router.push("/login");
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('회원가입 실패:', error);
-      showAlert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      if (error instanceof AxiosError && error.response?.data) {
+        const errorResponse = error.response.data as ApiResponse<null>;
+        showAlert(errorResponse.message);
+      } else {
+        showAlert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      }
     }
   };
 

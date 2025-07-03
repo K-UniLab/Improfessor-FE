@@ -5,9 +5,11 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import useProblem from "@/hooks/useProblem";
+import { useAlert } from "@/context/AlertContext";
 
 export default function GeneratePage() {
   const router = useRouter();
+  const { showAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
   const conceptFileRef = useRef<HTMLInputElement>(null);
   const formatFileRef = useRef<HTMLInputElement>(null);
@@ -24,6 +26,14 @@ export default function GeneratePage() {
     }
   };
 
+  const handleFormatFileClick = (e: React.MouseEvent) => {
+    if (!conceptFileRef.current?.files?.length) {
+      e.preventDefault();
+      showAlert('수업 자료를 먼저 업로드해 주세요.');
+      return;
+    }
+  };
+
   const handleFormatFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -34,7 +44,7 @@ export default function GeneratePage() {
   const handleGenerate = async () => {
     const conceptFiles = conceptFileRef.current?.files;
     if (!conceptFiles || conceptFiles.length === 0) {
-      alert('수업 자료를 업로드해주세요.');
+      showAlert('수업 자료를 업로드해주세요.');
       return;
     }
 
@@ -46,7 +56,6 @@ export default function GeneratePage() {
         formatFiles: formatFiles ? Array.from(formatFiles) : undefined,
       });
 
-      // URL에 상태를 포함하여 결과 페이지로 이동
       const state = {
         problems: response.data.problems,
         downloadKey: response.data.downloadKey,
@@ -54,7 +63,7 @@ export default function GeneratePage() {
       router.push(`/result?state=${encodeURIComponent(JSON.stringify(state))}`);
     } catch (error) {
       console.error('문제 생성 실패:', error);
-      alert('문제 생성에 실패했습니다.');
+      showAlert('문제 생성에 실패했습니다.');
       setIsLoading(false);
     }
   };
@@ -140,6 +149,7 @@ export default function GeneratePage() {
                 <label
                   htmlFor="reference-upload"
                   className="inline-flex flex-col items-center cursor-pointer"
+                  onClick={handleFormatFileClick}
                 >
                   <Image
                     src="/upload-icon.svg"
