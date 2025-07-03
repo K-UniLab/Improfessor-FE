@@ -2,20 +2,61 @@
 
 import Header from "@/components/Header";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import useProblem from "@/hooks/useProblem";
 
 export default function GeneratePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const conceptFileRef = useRef<HTMLInputElement>(null);
+  const formatFileRef = useRef<HTMLInputElement>(null);
+  const [conceptFileName, setConceptFileName] = useState<string>('');
+  const [formatFileName, setFormatFileName] = useState<string>('');
+
+  const { useGenerateProblem } = useProblem();
+  const generateProblemMutation = useGenerateProblem();
+
+  const handleConceptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setConceptFileName(file.name);
+    }
+  };
+
+  const handleFormatFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormatFileName(file.name);
+    }
+  };
 
   const handleGenerate = async () => {
+    const conceptFiles = conceptFileRef.current?.files;
+    if (!conceptFiles || conceptFiles.length === 0) {
+      alert('수업 자료를 업로드해주세요.');
+      return;
+    }
+
     setIsLoading(true);
-    // 실제로는 여기서 API 호출을 하겠지만, 지금은 setTimeout으로 대체
-    setTimeout(() => {
+    try {
+      const formatFiles = formatFileRef.current?.files;
+      const response = await generateProblemMutation.mutateAsync({
+        conceptFiles: Array.from(conceptFiles),
+        formatFiles: formatFiles ? Array.from(formatFiles) : undefined,
+      });
+
+      // URL에 상태를 포함하여 결과 페이지로 이동
+      const state = {
+        problems: response.data.problems,
+        downloadKey: response.data.downloadKey,
+      };
+      router.push(`/result?state=${encodeURIComponent(JSON.stringify(state))}`);
+    } catch (error) {
+      console.error('문제 생성 실패:', error);
+      alert('문제 생성에 실패했습니다.');
       setIsLoading(false);
-      router.push('/result');
-    }, 3000); // 3초 후 결과 페이지로 이동
+    }
   };
 
   return (
@@ -51,6 +92,8 @@ export default function GeneratePage() {
                   accept=".pdf,.ppt,.pptx"
                   className="hidden"
                   id="concept-upload"
+                  ref={conceptFileRef}
+                  onChange={handleConceptFileChange}
                 />
                 <label
                   htmlFor="concept-upload"
@@ -64,7 +107,7 @@ export default function GeneratePage() {
                     className="mb-4"
                   />
                   <span className="text-sm text-black mb-2">
-                    파일 선택하기
+                    {conceptFileName || '파일 선택하기'}
                   </span>
                   <span className="text-xs text-black">
                     (pdf, ppt 파일만 가능)
@@ -91,6 +134,8 @@ export default function GeneratePage() {
                   accept=".pdf,.ppt,.pptx"
                   className="hidden"
                   id="reference-upload"
+                  ref={formatFileRef}
+                  onChange={handleFormatFileChange}
                 />
                 <label
                   htmlFor="reference-upload"
@@ -104,7 +149,7 @@ export default function GeneratePage() {
                     className="mb-4"
                   />
                   <span className="text-sm text-black mb-2">
-                    파일 선택하기
+                    {formatFileName || '파일 선택하기'}
                   </span>
                   <span className="text-xs text-black">
                     (pdf, ppt 파일만 가능)
