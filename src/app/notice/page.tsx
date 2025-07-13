@@ -4,20 +4,22 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Pagination from "@/components/Pagination";
 import useNotice from "@/hooks/useNotice";
-import { useRouter } from "next/navigation";
 
 export default function NoticePage() {
-  const router = useRouter();
-  const { useNoticeList } = useNotice();
+  const { useNoticeList, useNoticeDetail } = useNotice();
   const { data: noticeResponse, isLoading } = useNoticeList();
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
+
+  // 항상 훅을 호출하되, id가 null이면 0을 넘김 (0은 실제로 존재하지 않는 id라고 가정)
+  const { data: detailResponse, isLoading: detailLoading } = useNoticeDetail(selectedNoticeId ?? 0);
+
   const notices = noticeResponse?.data || [];
   const totalPages = Math.ceil(notices.length / itemsPerPage);
 
-  // 현재 페이지에 해당하는 공지사항만 필터링
   const currentNotices = notices.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -30,7 +32,6 @@ export default function NoticePage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header />
-      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-8">
@@ -55,12 +56,10 @@ export default function NoticePage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-[#BCCCDC]">
                   {currentNotices.map((notice) => (
-                    <tr 
+                    <tr
                       key={notice.noticeId}
                       className="hover:bg-[#D9EAFD] cursor-pointer transition-colors"
-                      onClick={() => {
-                        router.push(`/notice/${notice.noticeId}`);
-                      }}
+                      onClick={() => setSelectedNoticeId(notice.noticeId)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                         {notice.noticeId}
@@ -93,6 +92,34 @@ export default function NoticePage() {
           </div>
         </div>
       </main>
+
+      {/* 상세 모달 */}
+      {selectedNoticeId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-8 relative">
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              onClick={() => setSelectedNoticeId(null)}
+            >
+              ✕
+            </button>
+            {detailLoading ? (
+              <div>로딩 중...</div>
+            ) : detailResponse && detailResponse.data ? (
+              <>
+                <h2 className="text-xl font-bold mb-2">{detailResponse.data.title}</h2>
+                <div className="text-sm text-gray-600 mb-4">
+                  작성일: {new Date(detailResponse.data.createdAt).toLocaleDateString()}<br />
+                  수정일: {new Date(detailResponse.data.updatedAt).toLocaleDateString()}
+                </div>
+                <div className="whitespace-pre-wrap">{detailResponse.data.content}</div>
+              </>
+            ) : (
+              <div>공지사항을 불러오는데 실패했습니다.</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
