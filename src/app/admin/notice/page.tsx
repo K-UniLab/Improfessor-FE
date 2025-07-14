@@ -51,15 +51,16 @@ export default function AdminNoticePage() {
       '정말로 이 공지사항을 삭제하시겠습니까?',
       '삭제된 공지사항은 복구할 수 없습니다.',
       async () => {
-      try {
-        await deleteNoticeMutation.mutateAsync(noticeId);
-        queryClient.invalidateQueries({ queryKey: ['notices'] });
-        showAlert('공지사항이 삭제되었습니다.');
-      } catch (error) {
-        showAlert('공지사항 삭제에 실패했습니다.');
-        console.error('공지사항 삭제 실패:', error);
+        try {
+          await deleteNoticeMutation.mutateAsync(noticeId);
+          queryClient.invalidateQueries({ queryKey: ['notices'] });
+          showAlert('공지사항이 삭제되었습니다.');
+        } catch (error) {
+          showAlert('공지사항 삭제에 실패했습니다.');
+          console.error('공지사항 삭제 실패:', error);
+        }
       }
-    });
+    );
   };
 
   if (isLoading) {
